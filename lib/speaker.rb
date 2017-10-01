@@ -1,9 +1,9 @@
 require "speaker/version"
 
 module Speaker
-  def initialize(logger_path, logger_error_path)
-    @logger = Logger.new(logger_path)
-    @logger_error = Logger.new(logger_error_path)
+  def initialize(logger_path = nil, logger_error_path = nil)
+    @logger = Logger.new(logger_path) unless logger_path.nil?
+    @logger_error = Logger.new(logger_error_path) unless logger_error_path.nil?
   end
 
   def ask_if_needed(question, no_prompt = 0, default = 'y')
@@ -17,19 +17,19 @@ module Speaker
 
   def speak_up(str)
     puts str
-    @logger.info(str)
+    @logger.info(str) if @logger
     $email_msg += str + NEW_LINE if $email_msg
   end
 
   def log(str)
-    @logger.info(str)
+    @logger.info(str) if @logger
   end
 
   def tell_error(e, src)
     puts "In #{src}"
     puts e
-    @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}")
-    @logger_error.error(e)
+    @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
+    @logger_error.error(e) if @logger_error
     $email_msg += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if $email_msg
     $email_msg += e.to_s + NEW_LINE if $email_msg
   end
