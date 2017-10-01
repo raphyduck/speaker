@@ -1,6 +1,6 @@
-require "speaker/version"
+require "simple_speaker/version"
 
-module Speaker
+module SimpleSpeaker
   def initialize(logger_path = nil, logger_error_path = nil)
     @logger = Logger.new(logger_path) unless logger_path.nil?
     @logger_error = Logger.new(logger_error_path) unless logger_error_path.nil?
