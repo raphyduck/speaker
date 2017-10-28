@@ -10,16 +10,16 @@ module SimpleSpeaker
     def ask_if_needed(question, no_prompt = 0, default = 'y')
       ask_if_needed = default
       if no_prompt.to_i == 0
-        self.speak_up(question)
+        self.speak_up(question, 0)
         ask_if_needed = STDIN.gets.strip
       end
       ask_if_needed
     end
 
-    def speak_up(str)
+    def speak_up(str, in_mail = 1)
       puts str
       @logger.info(str) if @logger
-      $email_msg += str + NEW_LINE if $email_msg
+      $email_msg += str + NEW_LINE if $email_msg && in_mail.to_i > 0
     end
 
     def log(str)
