@@ -18,6 +18,7 @@ module SimpleSpeaker
 
     def speak_up(str, in_mail = 1)
       puts str
+      $daemon_client.send_data str unless $daemon_client.nil?
       @logger.info(str) if @logger
       $email_msg += str + NEW_LINE if $email_msg && in_mail.to_i > 0
       str
