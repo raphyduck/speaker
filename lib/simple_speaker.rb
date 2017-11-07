@@ -20,6 +20,7 @@ module SimpleSpeaker
       puts str
       @logger.info(str) if @logger
       $email_msg += str + NEW_LINE if $email_msg && in_mail.to_i > 0
+      str
     end
 
     def log(str)
