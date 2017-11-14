@@ -2,11 +2,11 @@ require "simple_speaker/version"
 
 module SimpleSpeaker
   class Speaker
-    def initialize(logger_path = nil, logger_error_path = nil, daemon_server = nil, user_input = nil)
+    def initialize(logger_path = nil, logger_error_path = nil)
       @logger = Logger.new(logger_path) unless logger_path.nil?
       @logger_error = Logger.new(logger_error_path) unless logger_error_path.nil?
-      @daemon = daemon_server
-      @user_input = user_input
+      @daemon = nil
+      @user_input = nil
     end
 
     def ask_if_needed(question, no_prompt = 0, default = 'y')
@@ -26,6 +26,11 @@ module SimpleSpeaker
         end
       end
       ask_if_needed
+    end
+
+    def daemon(daemon_server = nil)
+      @daemon = daemon_server if daemon_server
+      @daemon
     end
 
     def speak_up(str, in_mail = 1)
@@ -49,6 +54,10 @@ module SimpleSpeaker
       @logger_error.error(e) if @logger_error
       Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
       Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
+    end
+
+    def user_input(input)
+      @user_input = input
     end
   end
 end
