@@ -45,15 +45,17 @@ module SimpleSpeaker
       @logger.info(str) if @logger
     end
 
-    def tell_error(e, src)
+    def tell_error(e, src, in_mail = 1)
       puts "In #{src}"
       @daemon.send_data "In #{src}\n" unless @daemon.nil?
       puts e
       @daemon.send_data "#{e}\n" unless @daemon.nil?
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
-      Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
-      Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
+      if in_mail.to_i > 0
+        Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
+        Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
+      end
     end
 
     def user_input(input)
