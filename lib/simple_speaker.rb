@@ -37,7 +37,10 @@ module SimpleSpeaker
       puts str
       @daemon.send_data "#{str}\n" unless @daemon.nil?
       @logger.info(str) if @logger
-      Thread.current[:email_msg] += str + NEW_LINE if Thread.current[:email_msg] && in_mail.to_i > 0
+      Thread.current[:email_msg] += str + NEW_LINE if Thread.current[:email_msg]
+      if in_mail.to_i > 0
+        Thread.current[:send_email] = in_mail.to_i if Thread.current[:send_email]
+      end
       str
     end
 
@@ -52,9 +55,10 @@ module SimpleSpeaker
       @daemon.send_data "#{e}\n" unless @daemon.nil?
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
+      Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
+      Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
       if in_mail.to_i > 0
-        Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
-        Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
+        Thread.current[:send_email] = in_mail.to_i if Thread.current[:send_email]
       end
     end
 
