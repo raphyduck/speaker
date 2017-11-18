@@ -5,7 +5,7 @@ module SimpleSpeaker
     def initialize(logger_path = nil, logger_error_path = nil)
       @logger = Logger.new(logger_path) unless logger_path.nil?
       @logger_error = Logger.new(logger_error_path) unless logger_error_path.nil?
-      @daemon = nil
+      @daemons = []
       @user_input = nil
     end
 
@@ -29,13 +29,12 @@ module SimpleSpeaker
     end
 
     def daemon(daemon_server = nil)
-      @daemon = daemon_server if daemon_server
-      @daemon
+      @daemons << daemon_server if daemon_server
     end
 
     def speak_up(str, in_mail = 1)
       puts str
-      @daemon.send_data "#{str}\n" unless @daemon.nil?
+      send_to_all(str)
       @logger.info(str) if @logger
       Thread.current[:email_msg] += str + NEW_LINE if Thread.current[:email_msg]
       if in_mail.to_i > 0
@@ -44,15 +43,19 @@ module SimpleSpeaker
       str
     end
 
+    def send_to_all(str)
+      @daemons.each { |d| d.send_data "#{str}\n" }
+    end
+
     def log(str)
       @logger.info(str) if @logger
     end
 
     def tell_error(e, src, in_mail = 1)
       puts "In #{src}"
-      @daemon.send_data "In #{src}\n" unless @daemon.nil?
+      send_to_all(src)
       puts e
-      @daemon.send_data "#{e}\n" unless @daemon.nil?
+      send_to_all(e)
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
       Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
