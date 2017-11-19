@@ -32,9 +32,13 @@ module SimpleSpeaker
       @daemons << daemon_server if daemon_server
     end
 
+    def daemon_send(str)
+      Thread.current[:current_daemon].send_data "#{str}\n" if Thread.current[:current_daemon]
+    end
+
     def speak_up(str, in_mail = 1)
       puts str
-      send_to_all(str)
+      daemon_send(str)
       @logger.info(str) if @logger
       Thread.current[:email_msg] += str + NEW_LINE if Thread.current[:email_msg]
       if in_mail.to_i > 0
@@ -43,19 +47,15 @@ module SimpleSpeaker
       str
     end
 
-    def send_to_all(str)
-      @daemons.each { |d| d.send_data "#{str}\n" }
-    end
-
     def log(str)
       @logger.info(str) if @logger
     end
 
     def tell_error(e, src, in_mail = 1)
       puts "In #{src}"
-      send_to_all(src)
+      daemon_send(src)
       puts e
-      send_to_all(e)
+      daemon_send(e)
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
       Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
