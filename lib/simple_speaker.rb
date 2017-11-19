@@ -28,10 +28,6 @@ module SimpleSpeaker
       ask_if_needed
     end
 
-    def daemon(daemon_server = nil)
-      @daemons << daemon_server if daemon_server
-    end
-
     def daemon_send(str)
       Thread.current[:current_daemon].send_data "#{str}\n" if Thread.current[:current_daemon]
     end
