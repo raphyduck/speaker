@@ -9,10 +9,10 @@ module SimpleSpeaker
       @user_input = nil
     end
 
-    def ask_if_needed(question, no_prompt = 0, default = 'y')
+    def ask_if_needed(question, no_prompt = 0, default = 'y', thread = Thread.current)
       ask_if_needed = default
       if no_prompt.to_i == 0
-        self.speak_up(question, 0)
+        self.speak_up(question, 0, thread)
         if Daemon.is_daemon?
           wtime = 0
           while @user_input.nil?
@@ -32,14 +32,18 @@ module SimpleSpeaker
       Thread.current[:current_daemon].send_data "#{str}\n" if Thread.current[:current_daemon]
     end
 
-    def speak_up(str, in_mail = 1)
+    def email_msg_add(str, in_mail, thread)
+      thread[:email_msg] += str + NEW_LINE if thread[:email_msg]
+      if in_mail.to_i > 0
+        thread[:send_email] = in_mail.to_i if thread[:send_email]
+      end
+    end
+
+    def speak_up(str, in_mail = 1, thread = Thread.current)
       puts str
       daemon_send(str)
       @logger.info(str) if @logger
-      Thread.current[:email_msg] += str + NEW_LINE if Thread.current[:email_msg]
-      if in_mail.to_i > 0
-        Thread.current[:send_email] = in_mail.to_i if Thread.current[:send_email]
-      end
+      email_msg_add(str, in_mail, thread)
       str
     end
 
@@ -47,18 +51,15 @@ module SimpleSpeaker
       @logger.info(str) if @logger
     end
 
-    def tell_error(e, src, in_mail = 1)
+    def tell_error(e, src, in_mail = 1, thread = Thread.current)
       puts "In #{src}"
       daemon_send(src)
       puts e
       daemon_send(e)
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
-      Thread.current[:email_msg] += "ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE if Thread.current[:email_msg]
-      Thread.current[:email_msg] += e.to_s + NEW_LINE if Thread.current[:email_msg]
-      if in_mail.to_i > 0
-        Thread.current[:send_email] = in_mail.to_i if Thread.current[:send_email]
-      end
+      email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE, in_mail, thread)
+      email_msg_add(e.to_s + NEW_LINE, in_mail, thread)
     end
 
     def user_input(input)
