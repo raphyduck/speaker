@@ -1,5 +1,7 @@
 require "simple_speaker/version"
 
+NEW_LINE = "\n"
+
 module SimpleSpeaker
   class Speaker
     def initialize(logger_path = nil, logger_error_path = nil)
@@ -33,7 +35,7 @@ module SimpleSpeaker
     end
 
     def email_msg_add(str, in_mail, thread)
-      thread[:email_msg] += str + NEW_LINE if thread[:email_msg]
+      thread[:email_msg] << str + NEW_LINE if thread[:email_msg]
       if in_mail.to_i > 0
         thread[:send_email] = in_mail.to_i if thread[:send_email]
       end
