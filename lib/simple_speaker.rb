@@ -1,14 +1,14 @@
 require "simple_speaker/version"
 
-NEW_LINE = "\n"
-
 module SimpleSpeaker
   class Speaker
+
     def initialize(logger_path = nil, logger_error_path = nil)
       @logger = Logger.new(logger_path) unless logger_path.nil?
       @logger_error = Logger.new(logger_error_path) unless logger_error_path.nil?
       @daemons = []
       @user_input = nil
+      @new_line = "\n"
     end
 
     def ask_if_needed(question, no_prompt = 0, default = 'y', thread = Thread.current)
@@ -35,7 +35,7 @@ module SimpleSpeaker
     end
 
     def email_msg_add(str, in_mail, thread)
-      thread[:email_msg] << str + NEW_LINE if thread[:email_msg]
+      thread[:email_msg] << str + @new_line if thread[:email_msg]
       if in_mail.to_i > 0
         thread[:send_email] = in_mail.to_i if thread[:send_email]
       end
@@ -60,8 +60,8 @@ module SimpleSpeaker
       daemon_send(e)
       @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
       @logger_error.error(e) if @logger_error
-      email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + NEW_LINE, in_mail, thread)
-      email_msg_add(e.to_s + NEW_LINE, in_mail, thread)
+      email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + @new_line, in_mail, thread)
+      email_msg_add(e.to_s + @new_line, in_mail, thread)
     end
 
     def user_input(input)
