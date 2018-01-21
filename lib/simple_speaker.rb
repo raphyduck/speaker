@@ -45,7 +45,7 @@ module SimpleSpeaker
     def speak_up(str, in_mail = 1, thread = Thread.current)
       puts str
       daemon_send(str)
-      @logger.info(str) if @logger
+      @logger.info("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{str}") if @logger
       email_msg_add(str, in_mail, thread)
       str
     end
