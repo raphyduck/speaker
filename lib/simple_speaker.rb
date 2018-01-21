@@ -35,6 +35,7 @@ module SimpleSpeaker
     end
 
     def email_msg_add(str, in_mail, thread)
+      str = "[*] #{str}" if in_mail.to_i > 0
       thread[:email_msg] << str + @new_line if thread[:email_msg]
       if in_mail.to_i > 0
         thread[:send_email] = in_mail.to_i if thread[:send_email]
