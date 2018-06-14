@@ -59,8 +59,8 @@ module SimpleSpeaker
       daemon_send(src)
       puts e
       daemon_send(e)
-      @logger_error.error("ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
-      @logger_error.error(e) if @logger_error
+      @logger_error.error("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
+      @logger_error.error("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{e}") if @logger_error
       email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + @new_line, in_mail, thread)
       email_msg_add(e.to_s + @new_line, in_mail, thread)
     end
