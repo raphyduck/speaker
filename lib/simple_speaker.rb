@@ -47,8 +47,7 @@ module SimpleSpeaker
     end
 
     def speak_up(str, in_mail = 1, thread = Thread.current)
-      if thread[:parent]
-        thread[:log_msg] = '' if thread[:log_msg].nil?
+      if thread[:log_msg]
         thread[:log_msg] << str + @new_line
       else
         str.each_line do |l|
