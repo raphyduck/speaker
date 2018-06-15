@@ -31,7 +31,11 @@ module SimpleSpeaker
     end
 
     def daemon_send(str)
-      Thread.current[:current_daemon].send_data "#{str}\n" if Thread.current[:current_daemon]
+      if Thread.current[:current_daemon]
+        Thread.current[:current_daemon].send_data "#{str}\n"
+      else
+        puts str
+      end
     end
 
     def email_msg_add(str, in_mail, thread)
@@ -43,23 +47,28 @@ module SimpleSpeaker
     end
 
     def speak_up(str, in_mail = 1, thread = Thread.current)
-      puts str
-      daemon_send(str)
-      @logger.info("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{str}") if @logger
-      email_msg_add(str, in_mail, thread)
+      if thread[:parent]
+        thread[:log_msg] = '' if thread[:log_msg].nil?
+        thread[:log_msg] << str + @new_line
+      else
+        str.each_line do |l|
+          daemon_send(l)
+          log("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{l}")
+        end
+      end
+      email_msg_add(str, in_mail, thread) if in_mail.to_i >= 0
       str
     end
 
-    def log(str)
+    def log(str, error = 0)
       @logger.info(str) if @logger
+      @logger_error.error(str) if @logger_error && error.to_i > 0
     end
 
     def tell_error(e, src, in_mail = 1, thread = Thread.current)
-      puts "In #{src}"
-      daemon_send(src)
-      puts e
+      daemon_send("In #{src}")
       daemon_send(e)
-      @logger_error.error("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}ERROR #{Time.now.utc.to_s} #{src}") if @logger_error
+      log("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}ERROR #{src}", 1)
       @logger_error.error("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{e}") if @logger_error
       email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + @new_line, in_mail, thread)
       email_msg_add(e.to_s + @new_line, in_mail, thread)

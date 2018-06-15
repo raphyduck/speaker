@@ -1,3 +1,3 @@
 module SimpleSpeaker
-  VERSION = "0.2.9.2"
+  VERSION = "0.3.0"
 end
