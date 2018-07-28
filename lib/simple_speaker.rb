@@ -71,6 +71,7 @@ module SimpleSpeaker
       @logger_error.error(e) if @logger_error
       email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + @new_line, in_mail, thread)
       email_msg_add(e.to_s + @new_line, in_mail, thread)
+      email_msg_add(e.backtrace[0..2].join(@new_line) + @new_line, in_mail, thread)
     end
 
     def user_input(input)
