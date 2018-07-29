@@ -65,13 +65,10 @@ module SimpleSpeaker
     end
 
     def tell_error(e, src, in_mail = 1, thread = Thread.current)
-      daemon_send("In #{src}")
-      daemon_send(e)
-      log("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}ERROR #{src}", 1)
       @logger_error.error(e) if @logger_error
-      email_msg_add("ERROR #{Time.now.utc.to_s} #{src}" + @new_line, in_mail, thread)
-      email_msg_add(e.to_s + @new_line, in_mail, thread)
-      email_msg_add(e.backtrace[0..2].join(@new_line) + @new_line, in_mail, thread)
+      speak_up("ERROR in '#{src}'" + @new_line, in_mail, thread)
+      speak_up(e.to_s + @new_line, in_mail, thread)
+      speak_up(e.backtrace[0..2].join(@new_line) + @new_line, in_mail, thread)
     end
 
     def user_input(input)
