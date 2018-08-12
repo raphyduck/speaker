@@ -14,7 +14,7 @@ module SimpleSpeaker
     def ask_if_needed(question, no_prompt = 0, default = 'y', thread = Thread.current)
       ask_if_needed = default
       if no_prompt.to_i == 0
-        self.speak_up(question, 0, thread)
+        self.speak_up(question, 0, thread, 1)
         if Daemon.is_daemon?
           wtime = 0
           while @user_input.nil?
@@ -46,10 +46,9 @@ module SimpleSpeaker
       end
     end
 
-    def speak_up(str, in_mail = 1, thread = Thread.current)
-      if thread[:log_msg]
-        thread[:log_msg] << str + @new_line
-      else
+    def speak_up(str, in_mail = 1, thread = Thread.current, immediate = 0)
+      thread[:log_msg] << str + @new_line if thread[:log_msg]
+      if immediate.to_i > 0
         str.each_line do |l|
           daemon_send(l)
           log("#{'[' + thread[:object].to_s + ']' if thread[:object].to_s != ''}#{l}")
